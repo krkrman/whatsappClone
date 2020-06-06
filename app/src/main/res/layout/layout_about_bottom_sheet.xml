@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:background="@drawable/bottom_sheet_background"
+    android:id="@+id/about_bottom_sheet_container"
+    android:backgroundTint="@color/colorPrimary"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:shadowColor="#3F51B5"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="15"
+        android:text="About"
+        android:textColor="#FFF4F4"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/about_edt_txt"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/edit_rounded"
+        android:backgroundTint="#FFF"
+        android:inputType="textMultiLine"
+        android:textColor="#000"
+        android:paddingLeft="20dp"
+        android:hint="About :"
+        android:textSize="13sp" />
+
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="50dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp">
+
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:id="@+id/register_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:mrl_rippleAlpha="0.2"
+            app:mrl_rippleColor="#028377"
+            app:mrl_rippleOverlay="true">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/about_done"
+                android:background="@drawable/sign_in_button"
+                android:text="Done"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+        </com.balysv.materialripple.MaterialRippleLayout>
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

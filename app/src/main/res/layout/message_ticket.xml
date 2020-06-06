@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/messageItem"
+    android:background="@color/transparent"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/friend_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="friend Message"
+        android:textColor="#FFF"
+        android:textSize="@dimen/_15ssp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:padding="@dimen/_10sdp"
+        android:background="@drawable/friend_message_background"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/friend_message_date"
+        android:layout_below="@id/friend_message"
+        android:layout_alignEnd="@id/friend_message"
+        android:text="12/3"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="gone"
+        />
+
+
+    <TextView
+        android:id="@+id/my_message"
+        android:text="my Message"
+        android:textColor="#000000"
+        android:textSize="@dimen/_15ssp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:padding="@dimen/_10sdp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/my_message_background"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/my_message_date"
+        android:layout_below="@id/friend_message"
+        android:layout_alignStart="@id/my_message"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>

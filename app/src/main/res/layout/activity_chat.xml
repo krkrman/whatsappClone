@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/chat_background"
+    tools:context=".ChatActivities.ChatActivity">
+
+    <include
+        android:id="@+id/chat_toolbar"
+        layout="@layout/chat_toolbar"></include>
+
+    <LinearLayout
+        android:id="@+id/request_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#B4B4B4"
+        android:layout_below="@id/chat_toolbar"
+        android:visibility="gone"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/accept_btn"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_50sdp"
+            android:text="accept"
+            android:background="@color/transparent"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="@dimen/_2sdp"
+            android:layout_height="match_parent"
+            android:background="#FFF"
+            />
+
+        <Button
+            android:id="@+id/decline_btn"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_50sdp"
+            android:layout_weight="1"
+            android:text="decline"
+            android:background="@color/transparent"
+        />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/request_linear_layout"
+        android:layout_above="@+id/message_linear_layout"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/message_linear_layout"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:orientation="horizontal">
+
+        <EditText
+            android:layout_gravity="bottom"
+            android:id="@+id/message_edt_txt"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_38sdp"
+            android:layout_marginLeft="@dimen/_7sdp"
+            android:layout_marginRight="@dimen/_6sdp"
+            android:layout_marginBottom="@dimen/_5sdp"
+            android:layout_weight="100"
+            android:background="@drawable/edit_rounded"
+            android:backgroundTint="#FFF"
+            android:drawableLeft="@drawable/ic_emojy_black_24dp"
+            android:drawableRight="@drawable/ic_photo_camera_black_24dp"
+            android:drawablePadding="@dimen/_5sdp"
+            android:drawableTint="#8F8B8B"
+            android:hint="Write you messge :"
+            android:inputType="textMultiLine"
+            android:paddingLeft="@dimen/_5sdp"
+            android:paddingRight="@dimen/_10sdp"
+            android:textColor="#000"
+            android:textSize="13sp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/send_btn"
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/_5sdp"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:src="@drawable/ic_mic_black_24dp"
+            android:tint="#fff" />
+    </LinearLayout>
+</RelativeLayout>
