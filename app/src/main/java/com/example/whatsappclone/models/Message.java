@@ -2,15 +2,23 @@ package com.example.whatsappclone.models;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class Message {
     String date;
     String time;
     String messageContent;
     String senderName;
+    boolean messageFromMe;
 
-    public Message(String messageContent, String senderName) {
+    public boolean isMessageFromMe() {
+        return messageFromMe;
+    }
+
+    public void setMessageFromMe(boolean messageFromMe) {
+        this.messageFromMe = messageFromMe;
+    }
+
+    public Message(String messageContent, String senderName , boolean messageFromMe ) {
         Calendar calendarForDate = Calendar.getInstance();
         SimpleDateFormat simpleDateFormatForDate = new SimpleDateFormat("MMM dd, yyyy");
         date = simpleDateFormatForDate.format(calendarForDate.getTime());
@@ -21,6 +29,7 @@ public class Message {
 
         this.messageContent = messageContent;
         this.senderName = senderName;
+        this.messageFromMe = messageFromMe;
     }
 
     public Message() {

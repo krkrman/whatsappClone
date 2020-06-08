@@ -154,12 +154,14 @@ public class ChatActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             Message message = child.getValue(Message.class);
+                            message.setMessageFromMe(false);
                             contactRef.child(friendUid).child(messageKey).setValue(message)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                         }
                                     });
+                            message.setMessageFromMe(true);
                             myRef.child("Contacts").child(friendUid).child(firebaseUser.getUid())
                                     .child(messageKey).setValue(message)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -380,10 +382,10 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot userUid : dataSnapshot.getChildren()) {
                     friendUidInContacts = userUid.getKey();
-                    Toast.makeText(ChatActivity.this, "friend", Toast.LENGTH_SHORT).show();
                 }
                 // if not save the messages in the requests
                 if (friendUidInContacts.trim().equals("")) {
+                    message.setMessageFromMe(true);
                     myRef.child("Requests").child(friendUid).child(firebaseUser.getUid())
                             .child(messageKey).setValue(message)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -394,6 +396,7 @@ public class ChatActivity extends AppCompatActivity {
                             });
                     // if yes save it in the contacts
                 } else {
+                    message.setMessageFromMe(true);
                     contactRef.child(friendUid).child(messageKey).setValue(message)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
@@ -406,7 +409,7 @@ public class ChatActivity extends AppCompatActivity {
 
                         }
                     });
-
+                    message.setMessageFromMe(false);
                     myRef.child("Contacts").child(friendUid).child(firebaseUser.getUid()).child(messageKey)
                             .setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override

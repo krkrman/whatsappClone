@@ -8,7 +8,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.whatsappclone.R;
-import com.example.whatsappclone.generalClasses.SharedPreference;
 import com.example.whatsappclone.models.Message;
 
 import java.util.ArrayList;
@@ -33,9 +32,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
 
     @Override
     public void onBindViewHolder(@NonNull final MessagesViewHolder holder, final int position) {
-        SharedPreference sharedPreference = new SharedPreference(context);
-        String myName = sharedPreference.loadData().getUsername();
-        if (MessagesList.get(position).getSenderName().equals(myName)) {
+        if (MessagesList.get(position).isMessageFromMe()) {
             holder.myMessage.setText(MessagesList.get(position).getMessageContent());
             holder.myMessageDate.setText(MessagesList.get(position).getDate());
             holder.friendMessage.setVisibility(View.GONE);

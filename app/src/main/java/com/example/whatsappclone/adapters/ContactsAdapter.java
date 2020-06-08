@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.whatsappclone.ChatActivities.ChatActivity;
 import com.example.whatsappclone.R;
 import com.example.whatsappclone.models.User;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
