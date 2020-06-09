@@ -7,9 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,10 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.whatsappclone.R;
-import com.example.whatsappclone.adapters.GroupListAdapter;
 import com.example.whatsappclone.adapters.MessagesAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
-import com.example.whatsappclone.models.GroupModelItem;
 import com.example.whatsappclone.models.Message;
 import com.example.whatsappclone.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -61,7 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private User friendData;
-    ArrayList<Message> allMessages = new ArrayList<>();
+    ArrayList<Message> allMessages;
     private RecyclerView recyclerView;
     private MessagesAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -72,14 +68,13 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
         initObjects();
         initView();
-        recieveData();
+        receiveData();
         Query applesQuery = myRef.child("Users").orderByChild("email").equalTo(friendData.getEmail());
         applesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot appleSnapshot : dataSnapshot.getChildren()) {
                     friendUid = appleSnapshot.getKey();
-
                     Query applesQuery = requestsRef.orderByChild("messageContent");
                     applesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -105,7 +100,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         initRecyclerView();
-
     }
 
     void initRecyclerView(){
@@ -118,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         // specify an adapter (see also next example)
         // put you list on the constructor
-        mAdapter = new MessagesAdapter(allMessages , this);
+        mAdapter = new MessagesAdapter(this);
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -232,7 +226,7 @@ public class ChatActivity extends AppCompatActivity {
         isNewRequest = false;
     }
 
-    void recieveData() {
+    void receiveData() {
         friendData = getIntent().getParcelableExtra("User");
     }
 
@@ -274,6 +268,7 @@ public class ChatActivity extends AppCompatActivity {
                 .child(friendUid).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                allMessages = new ArrayList<>();
                 Message newMessage = dataSnapshot.getValue(Message.class);
                 allMessages.add(newMessage);
                 displayMessages();
@@ -329,7 +324,6 @@ public class ChatActivity extends AppCompatActivity {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 allMessages.clear();
-                mAdapter.notifyDataSetChanged();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Message newMessage = child.getValue(Message.class);
                     allMessages.add(newMessage);
@@ -367,10 +361,39 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void displayMessages() {
+        allMessages = new ArrayList<>();
         mAdapter.setList(allMessages);
         if (mAdapter.getItemCount() != 0)
             recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
+
+    private void displayInsertedMessages(){
+        allMessages = new ArrayList<>();
+        mAdapter.setInsertedList(allMessages);
+        if (mAdapter.getItemCount() != 0)
+            recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+    /*private void getAllMessages(){
+        myRef.child("Contacts").child(firebaseUser.getUid())
+                .child(friendUid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                allMessages = new ArrayList<>();
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    Message newMessage = child.getValue(Message.class);
+                    allMessages.add(newMessage);
+                }
+                displayMessages();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+    }*/
 
     private void saveMessagesInDatabase(final Message message) {
         final String messageKey = myRef.push().getKey();

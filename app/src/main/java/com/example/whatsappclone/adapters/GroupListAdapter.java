@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.whatsappclone.ChatActivities.GroupChatActivity;
@@ -63,6 +64,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
         this.groupList = grouplist;
         notifyDataSetChanged();
     }
+
+
 
     public static class GroupViewHolder extends RecyclerView.ViewHolder {
 
