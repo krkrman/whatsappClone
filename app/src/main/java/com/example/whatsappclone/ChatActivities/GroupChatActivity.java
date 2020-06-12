@@ -2,6 +2,8 @@ package com.example.whatsappclone.ChatActivities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +14,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.whatsappclone.R;
+import com.example.whatsappclone.adapters.GroupListAdapter;
+import com.example.whatsappclone.adapters.GroupMessagesAdapter;
+import com.example.whatsappclone.adapters.MessagesAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
+import com.example.whatsappclone.models.GroupModelItem;
 import com.example.whatsappclone.models.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,22 +31,26 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 public class GroupChatActivity extends AppCompatActivity {
     String groupName;
     String participatedPeople;
+    String myUID;
     int groupImage;
     TextView groupNameTxtView;
     TextView participatedPeopleTxtView;
-    TextView messagesTxtView;
     ImageView groupImageView;
     EditText messageEdtTxt;
     FloatingActionButton sendBtn;
-    ScrollView scrollView;
     FirebaseDatabase database;
+    FirebaseUser firebaseUser;
     DatabaseReference myRef, groupMessages, groupMessageKeyRef;
     SharedPreference sharedPreference;
-    private FirebaseAuth firebaseAuth;
-    private FirebaseUser firebaseUser;
+    RecyclerView messagesRecyclerView;
+    private ArrayList<Message> allMessages;
+    private GroupMessagesAdapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +58,7 @@ public class GroupChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_group_chat);
         initObjects();
         initView();
-        recievingData();
+        receivingData();
         updateUi();
         clickEvents();
         getMessagesFromDatabase();
@@ -64,25 +74,38 @@ public class GroupChatActivity extends AppCompatActivity {
     }
 
     void initObjects() {
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseUser = firebaseAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
         sharedPreference = new SharedPreference(this);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        myUID = firebaseUser.getUid();
     }
 
     private void initView() {
         groupNameTxtView = findViewById(R.id.Friend_name);
-        messagesTxtView = findViewById(R.id.messages_txt_view);
+        messagesRecyclerView = findViewById(R.id.my_recycler_view);
         groupImageView = findViewById(R.id.friend_image_view);
         participatedPeopleTxtView = findViewById(R.id.status);
         messageEdtTxt = findViewById(R.id.message_edt_txt);
         sendBtn = findViewById(R.id.send_btn);
-        scrollView = findViewById(R.id.scroll_view);
-        scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+        initRecyclerView();
     }
 
-    void recievingData() {
+    void initRecyclerView(){
+        messagesRecyclerView = findViewById(R.id.my_recycler_view);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        messagesRecyclerView.setHasFixedSize(true);
+        // use a linear layout manager
+        layoutManager = new LinearLayoutManager(this);
+        messagesRecyclerView.setLayoutManager(layoutManager);
+        // specify an adapter (see also next example)
+        // put you list on the constructor
+        mAdapter = new GroupMessagesAdapter(this);
+        messagesRecyclerView.setAdapter(mAdapter);
+    }
+
+    void receivingData() {
         groupName = getIntent().getStringExtra("groupName");
         groupImage = getIntent().getIntExtra("groupImage", R.drawable.group_image);
         participatedPeople = getIntent().getStringExtra("participatedPeople");
@@ -102,16 +125,15 @@ public class GroupChatActivity extends AppCompatActivity {
             Message message = new Message();
             message.setMessageContent(messageContent);
             message.setSenderName(sharedPreference.loadData().getUsername());
+            message.setSenderID(myUID);
             groupMessageKeyRef = myRef.child("Groups").child(groupName).child("Messages").child(messageKey);
             groupMessageKeyRef.setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-
+                    getMessagesFromDatabase();
                 }
-
             });
             messageEdtTxt.setText("");
-            scrollView.fullScroll(ScrollView.FOCUS_DOWN);
         }
     }
 
@@ -122,23 +144,22 @@ public class GroupChatActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                messagesTxtView.setText("");
+                allMessages = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    Message allMessages = child.getValue(Message.class);
-                    displayMessages(allMessages);
+                    Message newMessage = child.getValue(Message.class);
+                    allMessages.add(newMessage);
                 }
-                scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+                displayMessages();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-
-        
     }
 
-    private void displayMessages(Message allMessages) {
-        messagesTxtView.append(allMessages.getSenderName() + " :" +"\n" + allMessages.getMessageContent() + "\n"
-                +allMessages.getTime() + "  "+ allMessages.getDate() + "\n\n\n");
+    private void displayMessages() {
+        mAdapter.setList(allMessages);
+        if (mAdapter.getItemCount() != 0)
+            messagesRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
 }

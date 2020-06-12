@@ -119,7 +119,6 @@ public class ChatActivity extends AppCompatActivity {
     void initView() {
         recyclerView = findViewById(R.id.my_recycler_view);
         friendNameTxtView = findViewById(R.id.Friend_name);
-        messagesTxtView = findViewById(R.id.messages_txt_view);
         friendImageView = findViewById(R.id.friend_image_view);
         statusTxtView = findViewById(R.id.status);
         messageEdtTxt = findViewById(R.id.message_edt_txt);
@@ -224,6 +223,7 @@ public class ChatActivity extends AppCompatActivity {
         friendUidInContacts = "";
         friendUid = "";
         isNewRequest = false;
+
     }
 
     void receiveData() {
@@ -264,11 +264,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void getMessagesFromDatabase(final String friendUid) {
-        myRef.child("Contacts").child(firebaseUser.getUid())
+        /*myRef.child("Contacts").child(firebaseUser.getUid())
                 .child(friendUid).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                allMessages = new ArrayList<>();
+                allMessages=new ArrayList<>();
                 Message newMessage = dataSnapshot.getValue(Message.class);
                 allMessages.add(newMessage);
                 displayMessages();
@@ -293,15 +293,14 @@ public class ChatActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
-        /*myRef.child("Contacts").child(firebaseUser.getUid())
+        });*/
+        myRef.child("Contacts").child(firebaseUser.getUid())
                 .child(friendUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                allMessages.clear();
-                mAdapter.notifyDataSetChanged();
+                allMessages =new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Message newMessage = child.getValue(Message.class);
                     allMessages.add(newMessage);
@@ -312,7 +311,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
-        });*/
+        });
     }
 
     private void getMessagesFromRequests(final String friendUid) {
@@ -344,8 +343,7 @@ public class ChatActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     // This method is called once with the initial value and again
                     // whenever data at this location is updated.
-                    allMessages.clear();
-                    mAdapter.notifyDataSetChanged();
+                    allMessages = new ArrayList<>();
                     for (DataSnapshot child : dataSnapshot.getChildren()) {
                         Message newMessage = child.getValue(Message.class);
                         allMessages.add(newMessage);
@@ -361,14 +359,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void displayMessages() {
-        allMessages = new ArrayList<>();
         mAdapter.setList(allMessages);
         if (mAdapter.getItemCount() != 0)
             recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
 
     private void displayInsertedMessages(){
-        allMessages = new ArrayList<>();
         mAdapter.setInsertedList(allMessages);
         if (mAdapter.getItemCount() != 0)
             recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/group_messages_recieved"
+    android:background="@color/transparent"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/friend_image"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_marginTop="@dimen/_13sdp"
+        android:layout_marginLeft="@dimen/_5sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:src="@drawable/default_profile_image"/>
+
+    <TextView
+        android:layout_marginTop="@dimen/_15sdp"
+        android:id="@+id/message_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/_5sdp"
+        android:background="@drawable/friend_message_background"
+        android:layout_toRightOf="@+id/friend_image"
+        android:padding="@dimen/_10sdp"
+        android:text="friend Message"
+        android:textColor="#FFF"
+        android:textSize="@dimen/_15ssp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/message_date"
+        android:layout_below="@id/message_content"
+        android:layout_alignEnd="@id/message_content"
+        android:text="12/3"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="gone"
+        />
+</RelativeLayout>

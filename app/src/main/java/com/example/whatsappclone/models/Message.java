@@ -8,6 +8,7 @@ public class Message {
     String time;
     String messageContent;
     String senderName;
+    String senderID;
     boolean messageFromMe;
 
     public boolean isMessageFromMe() {
@@ -64,5 +65,13 @@ public class Message {
 
     public String getTime() {
         return time;
+    }
+
+    public String getSenderID(){
+        return senderID;
+    }
+
+    public void setSenderID(String senderID){
+        this.senderID = senderID;
     }
 }

@@ -13,10 +13,19 @@ import com.example.whatsappclone.R;
 import com.example.whatsappclone.models.Message;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder> {
+
+    public static final int RECEIVED_MESSAGE = 100;
+    public static final int SEND_MESSAGE = 200;
+
     ArrayList<Message> messagesList;
     Context context;
+
+    public MessagesAdapter(ArrayList<Message> messagesList) {
+        this.messagesList = messagesList;
+    }
 
     public MessagesAdapter(Context context) {
         this.context = context;
@@ -25,21 +34,19 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
     @NonNull
     @Override
     public MessagesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MessagesViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.message_ticket, parent, false)); //Here write the item layout
+        View view = null;
+        if (viewType == SEND_MESSAGE) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.messages_sent_ticket, parent, false);
+        }else if (viewType == RECEIVED_MESSAGE){
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.messages_recieved_ticket, parent, false);
+        }
+        return new MessagesViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final MessagesViewHolder holder, final int position) {
-        if (messagesList.get(position).isMessageFromMe()) {
-            holder.myMessage.setText(messagesList.get(position).getMessageContent());
-            holder.myMessageDate.setText(messagesList.get(position).getDate());
-            holder.friendMessage.setVisibility(View.GONE);
-        } else {
-            holder.friendMessage.setText(messagesList.get(position).getMessageContent());
-            holder.friendMessageDate.setText(messagesList.get(position).getDate());
-            holder.myMessage.setVisibility(View.GONE);
-        }
+        holder.messageContent.setText(messagesList.get(position).getMessageContent());
+        holder.messageDate.setText(messagesList.get(position).getDate());
     }
 
     @Override
@@ -59,18 +66,23 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
             notifyItemInserted(messagesList.size()-1);
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        Message message = messagesList.get(position);
+        if (message.isMessageFromMe())
+            return SEND_MESSAGE;
+        else
+            return RECEIVED_MESSAGE;
+    }
+
     public static class MessagesViewHolder extends RecyclerView.ViewHolder {
         //initialize the view of the item as shown below
-        TextView myMessage;
-        TextView friendMessage;
-        TextView friendMessageDate, myMessageDate;
+        TextView messageContent , messageDate;
 
         public MessagesViewHolder(@NonNull View itemView) {
             super(itemView);
-            myMessage = itemView.findViewById(R.id.my_message);
-            friendMessage = itemView.findViewById(R.id.friend_message);
-            friendMessageDate = itemView.findViewById(R.id.friend_message_date);
-            myMessageDate = itemView.findViewById(R.id.my_message_date);// this is the whole item which we will click on
+            messageContent = itemView.findViewById(R.id.message_content);
+            messageDate = itemView.findViewById(R.id.message_date);// this is the whole item which we will click on
         }
     }
 }

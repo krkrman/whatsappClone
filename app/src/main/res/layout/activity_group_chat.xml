@@ -12,22 +12,12 @@
         android:id="@+id/activity_main_toolbar"
         layout="@layout/chat_toolbar"></include>
 
-    <ScrollView
-        android:id="@+id/scroll_view"
-        android:layout_below="@+id/activity_main_toolbar"
-        android:layout_above="@+id/message_linear_layout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
-        <TextView
-            android:id="@+id/messages_txt_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_3sdp"
-            android:text="No Messages "
-            android:textSize="@dimen/_15ssp" />
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_main_toolbar"
+        android:layout_above="@+id/message_linear_layout"/>
 
     <LinearLayout
         android:layout_width="match_parent"
