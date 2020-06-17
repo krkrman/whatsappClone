@@ -4,9 +4,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
 import androidx.viewpager.widget.ViewPager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,12 +24,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.example.whatsappclone.Settings.ProfileActivity;
 import com.example.whatsappclone.Settings.SettingsActivity;
+import com.example.whatsappclone.broadcastRecievers.MessagesNotificationsReciever;
 import com.example.whatsappclone.fragments.TabAccessorAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
+import com.example.whatsappclone.models.Message;
 import com.example.whatsappclone.models.User;
 import com.example.whatsappclone.models.GroupModelItem;
 import com.example.whatsappclone.registiration.LoginActivity;
 import com.example.whatsappclone.registiration.RegisterActivity;
+import com.example.whatsappclone.services.MessagesNotificationService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
@@ -32,6 +43,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -45,18 +58,26 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private User userData;
+    private GeneralPurposes generalPurposes;
     SharedPreference sharedPreference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initView();
         initObjects();
+        generalPurposes.setMeOnline();
         checkUser(firebaseUser);
         createDatabase();
         getData(firebaseUser);
+        fireService();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        generalPurposes.setMeOffline();
     }
 
     @Override
@@ -72,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void initObjects() {
+        generalPurposes = new GeneralPurposes(this);
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
         sharedPreference = new SharedPreference(this);
@@ -258,4 +280,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    void fireService(){
+        Intent serviceIntent = new Intent(this, MessagesNotificationService.class);
+        serviceIntent.putExtra("myUid", firebaseUser.getUid());
+        MessagesNotificationService.enqueueWork(this , serviceIntent);
+
+    }
+
+
 }

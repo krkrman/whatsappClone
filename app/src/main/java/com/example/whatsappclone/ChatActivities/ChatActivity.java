@@ -8,10 +8,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,7 +44,6 @@ public class ChatActivity extends AppCompatActivity {
     String friendImageUrl;
     TextView friendNameTxtView;
     TextView statusTxtView;
-    TextView messagesTxtView;
     ImageView friendImageView;
     EditText messageEdtTxt;
     LinearLayout requestLinearLayout;
@@ -57,7 +58,7 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private User friendData;
-    ArrayList<Message> allMessages;
+    ArrayList<Message> allMessages , notificationMessages;
     private RecyclerView recyclerView;
     private MessagesAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -67,8 +68,8 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         initObjects();
-        initView();
         receiveData();
+        initView();
         Query applesQuery = myRef.child("Users").orderByChild("email").equalTo(friendData.getEmail());
         applesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -84,6 +85,7 @@ public class ChatActivity extends AppCompatActivity {
                             }
                             clickEvents();
                             setView();
+                            checkFriendStatus();
                         }
 
                         @Override
@@ -237,7 +239,6 @@ public class ChatActivity extends AppCompatActivity {
             sendBtn.setEnabled(false);
         }
         friendNameTxtView.setText(friendData.getUsername());
-        statusTxtView.setText(friendData.getAbout());
         friendImageUrl = friendData.getImageUrl();
         if (!friendImageUrl.trim().equals(""))
             Picasso.get().load(friendImageUrl).placeholder(R.drawable.default_profile_image)
@@ -258,6 +259,7 @@ public class ChatActivity extends AppCompatActivity {
             Message message = new Message();
             message.setMessageContent(messageContent);
             message.setSenderName(sharedPreference.loadData().getUsername());
+            message.setSenderID(firebaseUser.getUid());
             saveMessagesInDatabase(message);
             messageEdtTxt.setText("");
         }
@@ -391,9 +393,28 @@ public class ChatActivity extends AppCompatActivity {
         });
     }*/
 
+    void checkFriendStatus(){
+        //Check if my friend is online
+        myRef.child("Users").child(friendUid).child("online").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                Boolean isFriendOnline = dataSnapshot.getValue(Boolean.class);
+                if (isFriendOnline){
+                    statusTxtView.setText("Online");
+                }else {
+                    statusTxtView.setText("Offline");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+    }
     private void saveMessagesInDatabase(final Message message) {
         final String messageKey = myRef.push().getKey();
-
         //check if the friend in the user's contacts
         Query contacts = myRef.child("Contacts").child(firebaseUser.getUid()).orderByKey().equalTo(friendUid);
         contacts.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -441,13 +462,39 @@ public class ChatActivity extends AppCompatActivity {
 
                         }
                     });
-
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+
+        //Check if my friend is online
+        myRef.child("Users").child(friendUid).child("online").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                Boolean isFriendOnline = dataSnapshot.getValue(Boolean.class);
+                if (!isFriendOnline){
+                    sendDataToNotification(message);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+
+    }
+
+    void sendDataToNotification(Message message){
+        final String messageKey = myRef.push().getKey();
+        myRef.child("Notifications").child(friendUid).child(messageKey)
+                .setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
             }
         });
     }

@@ -21,6 +21,7 @@ public class SharedPreference {
         editor.putString("about", user.getAbout());
         editor.putString("phone", user.getPhone());
         editor.putString("imageUrl", user.getImageUrl());
+        editor.putBoolean("online" , user.isOnline());
 
         editor.commit();
     }
@@ -33,6 +34,7 @@ public class SharedPreference {
         user.setAbout(sharedPreferences.getString("about", "unknown"));
         user.setPhone(sharedPreferences.getString("phone", "unknown"));
         user.setImageUrl(sharedPreferences.getString("imageUrl",""));
+        user.setOnline(sharedPreferences.getBoolean("online", false));
 
         return user;
     }

@@ -11,6 +11,16 @@ public class Message {
     String senderID;
     boolean messageFromMe;
 
+    public boolean isMessageRead() {
+        return isMessageRead;
+    }
+
+    public void setMessageRead(boolean messageRead) {
+        isMessageRead = messageRead;
+    }
+
+    boolean isMessageRead;
+
     public boolean isMessageFromMe() {
         return messageFromMe;
     }
