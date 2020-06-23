@@ -3,7 +3,17 @@ package com.example.whatsappclone.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "user_table") // if you did not write table name it will be the class name by default
 public class User implements Parcelable {
+    public int getId() {
+        return id;
+    }
+
+    @PrimaryKey(autoGenerate = true) // every new row will have new id automatically
+    int id;
     String username;
     String email;
     String phone;
@@ -47,6 +57,9 @@ public class User implements Parcelable {
         }
     };
 
+    public void setId(int id){
+        this.id = id;
+    }
     public String getUsername() {
         return username;
     }

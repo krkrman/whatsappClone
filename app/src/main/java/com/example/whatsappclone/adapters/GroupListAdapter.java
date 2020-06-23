@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.whatsappclone.ChatActivities.GroupChatActivity;
@@ -40,16 +39,15 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
     @Override
     public void onBindViewHolder(@NonNull GroupViewHolder holder, final int position) {
         // here make what you want to do in the item including what happened when clicking on the item
-        holder.userNameTxtView.setText(groupList.get(position).getGroupName());
-        holder.userLastMessageTxtView.setText(groupList.get(position).getLastMessage());
-        holder.userImageView.setImageResource(groupList.get(position).getImage());
+        holder.groupNameTxtView.setText(groupList.get(position).getGroupName());
+        holder.groupLastMessageTxtView.setText(groupList.get(position).getLastMessage());
+        // holder.groupImageView.setImageResource(groupList.get(position).getImage());
         holder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, GroupChatActivity.class);
                 intent.putExtra("groupName",groupList.get(position).getGroupName());
                 intent.putExtra("groupImage",groupList.get(position).getImage());
-                intent.putExtra("participatedPeople",groupList.get(position).getParticipatedPeople());
                 context.startActivity(intent);
             }
         });
@@ -65,20 +63,18 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
         notifyDataSetChanged();
     }
 
-
-
     public static class GroupViewHolder extends RecyclerView.ViewHolder {
 
         //initialize the view of the item as shown below
-        TextView userNameTxtView;
-        TextView userLastMessageTxtView;
-        ImageView userImageView;
+        TextView groupNameTxtView;
+        TextView groupLastMessageTxtView;
+        ImageView groupImageView;
         LinearLayout linearLayout;
         public GroupViewHolder(@NonNull View itemView ) {
             super(itemView);
-            userNameTxtView = itemView.findViewById(R.id.name_txt_view);
-            userLastMessageTxtView = itemView.findViewById(R.id.last_message_txt_view);
-            userImageView = itemView.findViewById(R.id.item_pic);
+            groupNameTxtView = itemView.findViewById(R.id.name_txt_view);
+            groupLastMessageTxtView = itemView.findViewById(R.id.last_message_txt_view);
+            groupImageView = itemView.findViewById(R.id.item_pic);
             linearLayout = itemView.findViewById(R.id.group_item_linear_layout);// this is the whole item which we will click on
         }
     }

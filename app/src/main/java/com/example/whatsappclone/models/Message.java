@@ -1,15 +1,28 @@
 package com.example.whatsappclone.models;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
+@Entity(tableName = "message_table") // if you did not write table name it will be the class name by default
 public class Message {
-    String date;
-    String time;
+    @PrimaryKey(autoGenerate = true) // every new row will have new id automatically
+    public int id;
+    public String date;
+    public String time;
     String messageContent;
     String senderName;
     String senderID;
     boolean messageFromMe;
+    boolean isMessageRead;
+
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public boolean isMessageRead() {
         return isMessageRead;
@@ -18,8 +31,6 @@ public class Message {
     public void setMessageRead(boolean messageRead) {
         isMessageRead = messageRead;
     }
-
-    boolean isMessageRead;
 
     public boolean isMessageFromMe() {
         return messageFromMe;

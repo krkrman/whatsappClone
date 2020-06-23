@@ -10,15 +10,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.whatsappclone.R;
-import com.example.whatsappclone.adapters.GroupListAdapter;
 import com.example.whatsappclone.adapters.GroupMessagesAdapter;
-import com.example.whatsappclone.adapters.MessagesAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
-import com.example.whatsappclone.models.GroupModelItem;
 import com.example.whatsappclone.models.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

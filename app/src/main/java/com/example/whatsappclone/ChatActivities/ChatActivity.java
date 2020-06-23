@@ -8,12 +8,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,13 +21,13 @@ import com.example.whatsappclone.adapters.MessagesAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
 import com.example.whatsappclone.models.Message;
 import com.example.whatsappclone.models.User;
+import com.example.whatsappclone.viewmodels.ChatActivityViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -55,10 +55,11 @@ public class ChatActivity extends AppCompatActivity {
     String friendUid;
     String friendUidInContacts;
     boolean isNewRequest;
+    List<Message> allMessages, notificationMessages;
+    ChatActivityViewModel chatActivityViewModel;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private User friendData;
-    ArrayList<Message> allMessages , notificationMessages;
     private RecyclerView recyclerView;
     private MessagesAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -102,9 +103,20 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         initRecyclerView();
+        chatActivityViewModel = new ViewModelProvider(this,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(ChatActivityViewModel.class); // this is the instance of AndroidViewModel
+
+        chatActivityViewModel.getChats().observe(this, new Observer<List<Message>>() {
+            @Override
+            public void onChanged(List<Message> messageList) {
+                mAdapter.setList(messageList);
+            }
+        });
+        setView();
     }
 
-    void initRecyclerView(){
+    void initRecyclerView() {
         recyclerView = findViewById(R.id.my_recycler_view);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -225,7 +237,6 @@ public class ChatActivity extends AppCompatActivity {
         friendUidInContacts = "";
         friendUid = "";
         isNewRequest = false;
-
     }
 
     void receiveData() {
@@ -239,6 +250,7 @@ public class ChatActivity extends AppCompatActivity {
             sendBtn.setEnabled(false);
         }
         friendNameTxtView.setText(friendData.getUsername());
+        statusTxtView.setText(friendData.getAbout());
         friendImageUrl = friendData.getImageUrl();
         if (!friendImageUrl.trim().equals(""))
             Picasso.get().load(friendImageUrl).placeholder(R.drawable.default_profile_image)
@@ -302,7 +314,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                allMessages =new ArrayList<>();
+                allMessages = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Message newMessage = child.getValue(Message.class);
                     allMessages.add(newMessage);
@@ -362,38 +374,12 @@ public class ChatActivity extends AppCompatActivity {
 
     private void displayMessages() {
         mAdapter.setList(allMessages);
+        chatActivityViewModel.insertAllMessages(allMessages);
         if (mAdapter.getItemCount() != 0)
             recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
     }
 
-    private void displayInsertedMessages(){
-        mAdapter.setInsertedList(allMessages);
-        if (mAdapter.getItemCount() != 0)
-            recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-    }
-
-    /*private void getAllMessages(){
-        myRef.child("Contacts").child(firebaseUser.getUid())
-                .child(friendUid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                allMessages = new ArrayList<>();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    Message newMessage = child.getValue(Message.class);
-                    allMessages.add(newMessage);
-                }
-                displayMessages();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
-    }*/
-
-    void checkFriendStatus(){
+    void checkFriendStatus() {
         //Check if my friend is online
         myRef.child("Users").child(friendUid).child("online").addValueEventListener(new ValueEventListener() {
             @Override
@@ -401,9 +387,9 @@ public class ChatActivity extends AppCompatActivity {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 Boolean isFriendOnline = dataSnapshot.getValue(Boolean.class);
-                if (isFriendOnline){
+                if (isFriendOnline) {
                     statusTxtView.setText("Online");
-                }else {
+                } else {
                     statusTxtView.setText("Offline");
                 }
             }
@@ -413,6 +399,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
     private void saveMessagesInDatabase(final Message message) {
         final String messageKey = myRef.push().getKey();
         //check if the friend in the user's contacts
@@ -472,24 +459,11 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         //Check if my friend is online
-        myRef.child("Users").child(friendUid).child("online").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                Boolean isFriendOnline = dataSnapshot.getValue(Boolean.class);
-                if (!isFriendOnline){
-                    sendDataToNotification(message);
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError error) {
-            }
-        });
-
+        if (statusTxtView.getText().equals("Offline"))
+            sendDataToNotification(message);
     }
 
-    void sendDataToNotification(Message message){
+    void sendDataToNotification(Message message) {
         final String messageKey = myRef.push().getKey();
         myRef.child("Notifications").child(friendUid).child(messageKey)
                 .setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -498,6 +472,5 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
-
 }
 

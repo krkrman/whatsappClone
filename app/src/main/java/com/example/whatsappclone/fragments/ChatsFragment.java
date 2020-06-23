@@ -1,51 +1,49 @@
 package com.example.whatsappclone.fragments;
 
-import android.content.Intent;
+import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.whatsappclone.ChatActivities.ChatActivity;
+import com.example.whatsappclone.MainActivity;
+import com.example.whatsappclone.viewmodels.ChatsViewModel;
 import com.example.whatsappclone.R;
-import com.example.whatsappclone.Settings.ProfileActivity;
+import com.example.whatsappclone.adapters.ChatListAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
 import com.example.whatsappclone.models.User;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.picasso.Picasso;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.gson.reflect.TypeToken.get;
 
 
 public class ChatsFragment extends Fragment {
 
     public ChatsFragment() {
-        // Required empty public constructor
     }
 
     SharedPreference sharedPreference;
     // TODO: Rename and change types of parameters
     private RequestsFragment.OnFragmentInteractionListener mListener;
     private DatabaseReference userRef;
-    private RecyclerView recyclerView;
     View chatFragmentView;
+
+    private RecyclerView recyclerView;
+    private ChatListAdapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,22 +51,44 @@ public class ChatsFragment extends Fragment {
         chatFragmentView = inflater.inflate(R.layout.fragment_chats, container, false);
         initRecyclerView();
         sharedPreference = new SharedPreference(getContext());
+
+        final ChatsViewModel chatsViewModel = new ViewModelProvider(this,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
+                .get(ChatsViewModel.class); // this is the instance of AndroidViewModel
+
+        chatsViewModel.getChats().observe(this, new Observer<List<User>>() {
+            @Override
+            public void onChanged(List<User> users) {
+                mAdapter.setList(users);
+            }
+        });
+
         return chatFragmentView;
     }
 
-    void initRecyclerView() {
-        userRef = FirebaseDatabase.getInstance().getReference().child("Users");
+    void initRecyclerView(){
         recyclerView = chatFragmentView.findViewById(R.id.my_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+
+        // specify an adapter (see also next example)
+        // put you list on the constructor
+        mAdapter = new ChatListAdapter(getContext());
+        recyclerView.setAdapter(mAdapter);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        initFirebaseAdapter();
+        //initFirebaseAdapter();
     }
 
-    public static class FindFriendViewHolder extends RecyclerView.ViewHolder {
+    /*public static class FindFriendViewHolder extends RecyclerView.ViewHolder {
         TextView userName, userStatus;
         CircleImageView profileImage;
         LinearLayout wholeItem;
@@ -134,5 +154,5 @@ public class ChatsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         adapter.startListening();
     }
-
+*/
 }

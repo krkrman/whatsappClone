@@ -23,6 +23,8 @@ public class MessagesNotificationsReciever extends BroadcastReceiver {
             MessagesNotificationService.sendChannel1Notification(context);
         }
 
-
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())){
+            MessagesNotificationService.sendChannel1Notification(context);
+        }
     }
 }

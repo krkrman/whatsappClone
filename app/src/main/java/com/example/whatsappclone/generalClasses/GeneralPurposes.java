@@ -1,4 +1,4 @@
-package com.example.whatsappclone;
+package com.example.whatsappclone.generalClasses;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,8 +11,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class GeneralPurposes {
     FirebaseUser firebaseUser;
@@ -22,7 +26,7 @@ public class GeneralPurposes {
     Context context;
     User user;
     private static final String TAG = "Completion";
-    GeneralPurposes(Context context){
+    public GeneralPurposes(Context context){
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         firebaseDatabase = firebaseDatabase.getInstance();
         myRef = firebaseDatabase.getReference();
@@ -32,7 +36,7 @@ public class GeneralPurposes {
         user = sharedPreference.loadData();
     }
 
-    void setMeOnline(){
+    public void setMeOnline(){
         user.setOnline(true);
         sharedPreference.saveData(user);
         myRef.child("Users").child(firebaseUser.getUid()).child("online")
@@ -44,7 +48,7 @@ public class GeneralPurposes {
         });
     }
 
-    void setMeOffline(){
+    public void setMeOffline(){
         user.setOnline(false);
         sharedPreference.saveData(user);
         myRef.child("Users").child(firebaseUser.getUid()).child("online")
@@ -54,5 +58,22 @@ public class GeneralPurposes {
                 Log.d(TAG, "completedSuccessfully ");
             }
         });
+    }
+
+    public void deleteNotification(){
+        Query query = myRef.child("Notifications").child(firebaseUser.getUid())
+                .orderByChild("messageContent");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                    dataSnapshot.getRef().removeValue();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Database delete" , "onCancelled", databaseError.toException());
+            }
+        });
+
     }
 }

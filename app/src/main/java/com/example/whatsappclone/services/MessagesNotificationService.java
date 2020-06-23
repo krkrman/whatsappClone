@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.RemoteInput;
 
+import com.example.whatsappclone.ChatActivities.ChatActivity;
 import com.example.whatsappclone.MainActivity;
 import com.example.whatsappclone.R;
 import com.example.whatsappclone.broadcastRecievers.MessagesNotificationsReciever;
@@ -34,7 +35,7 @@ import static com.example.whatsappclone.notification.App.CHANNEL_ID;
 public class MessagesNotificationService extends JobIntentService {
     private static final String TAG = "Service";
     public static ArrayList<Message> allMessages;
-    boolean isItFirstTime;
+    boolean isItFirstTime , isItSecondTime;
     DatabaseReference myRef;
 
     public static void enqueueWork(Context context, Intent work) {
@@ -97,7 +98,8 @@ public class MessagesNotificationService extends JobIntentService {
         super.onCreate();
         myRef = FirebaseDatabase.getInstance().getReference();
         allMessages = new ArrayList<>();
-        isItFirstTime = true;
+        isItFirstTime = false;
+        isItSecondTime = false;
         Log.d(TAG, "onCreate");
     }
 
@@ -109,15 +111,15 @@ public class MessagesNotificationService extends JobIntentService {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 allMessages = new ArrayList<>();
+                allMessages.clear();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Message newMessage = child.getValue(Message.class);
                     allMessages.add(newMessage);
                 }
-                if (!isItFirstTime) {
-                    Toast.makeText(MessagesNotificationService.this, "Entered", Toast.LENGTH_SHORT).show();
+                if (isItFirstTime) {
                     sendChannel1Notification(MessagesNotificationService.this);
                 }
-                isItFirstTime = false;
+                isItFirstTime = true;
             }
 
             @Override
@@ -138,6 +140,4 @@ public class MessagesNotificationService extends JobIntentService {
         Log.d(TAG, "onStopCurrentWork");
         return super.onStopCurrentWork();
     }
-
-
 }

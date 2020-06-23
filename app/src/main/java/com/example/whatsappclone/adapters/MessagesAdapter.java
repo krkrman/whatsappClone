@@ -20,10 +20,10 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
     public static final int RECEIVED_MESSAGE = 100;
     public static final int SEND_MESSAGE = 200;
 
-    ArrayList<Message> messagesList;
+    List<Message> messagesList;
     Context context;
 
-    public MessagesAdapter(ArrayList<Message> messagesList) {
+    public MessagesAdapter(List<Message> messagesList) {
         this.messagesList = messagesList;
     }
 
@@ -55,15 +55,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         return messagesList.size();
     }
 
-    public void setList(ArrayList<Message> messagesList) {
+    public void setList(List<Message> messagesList) {
         this.messagesList = messagesList;
         notifyDataSetChanged();
-    }
-
-    public void setInsertedList(ArrayList<Message> messagesList){
-        this.messagesList = messagesList;
-        if (!(messagesList.size() < 1))
-            notifyItemInserted(messagesList.size()-1);
     }
 
     @Override
