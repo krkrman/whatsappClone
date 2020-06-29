@@ -24,7 +24,6 @@ public class ChatsViewModel extends AndroidViewModel {
     }
 
     public MutableLiveData<List<User>> getChats(){
-        repository.getAllUsersFromFirebase();
         allUsersInContactsLiveData = repository.getLiveData();
         return allUsersInContactsLiveData;
     }

@@ -12,7 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
 
 import com.example.whatsappclone.R;
 import com.example.whatsappclone.adapters.ChatListAdapter;
@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class GroupsFragment extends Fragment {
@@ -79,7 +80,7 @@ public class GroupsFragment extends Fragment {
 /***************************************************************************************************/
     FirebaseDatabase database;
     DatabaseReference myRef;
-    private ArrayList<GroupModelItem> groupModelItemArrayList;
+    private List<GroupModelItem> groupModelItemArrayList;
     private RecyclerView recyclerView;
     private GroupListAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -138,11 +139,13 @@ public class GroupsFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    public void setFilteredList(String searchedItems){
+        mAdapter.getFilter().filter(searchedItems);
+    }
 
     /***********************************************************************************************/
     // TODO: Rename method, update argument and hook method into UI event
@@ -173,4 +176,5 @@ public class GroupsFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
 }

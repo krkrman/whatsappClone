@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +29,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -54,7 +56,7 @@ public class ChatActivity extends AppCompatActivity {
     SharedPreference sharedPreference;
     String friendUid;
     String friendUidInContacts;
-    boolean isNewRequest;
+    boolean isNewRequest ,isItFirstTime;
     List<Message> allMessages, notificationMessages;
     ChatActivityViewModel chatActivityViewModel;
     private FirebaseAuth firebaseAuth;
@@ -226,6 +228,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void initObjects() {
+        allMessages = new ArrayList<>();
+        isItFirstTime = true;
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
@@ -274,58 +278,110 @@ public class ChatActivity extends AppCompatActivity {
             message.setSenderID(firebaseUser.getUid());
             saveMessagesInDatabase(message);
             messageEdtTxt.setText("");
+            //setOrder();
         }
     }
 
-    void getMessagesFromDatabase(final String friendUid) {
-        /*myRef.child("Contacts").child(firebaseUser.getUid())
-                .child(friendUid).addChildEventListener(new ChildEventListener() {
+    public void setOrder(){
+        myRef.child("Contacts").child(firebaseUser.getUid()).child(friendUid).child("Order")
+                .setValue(0).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                allMessages=new ArrayList<>();
-                Message newMessage = dataSnapshot.getValue(Message.class);
-                allMessages.add(newMessage);
-                displayMessages();
-            }
+            public void onComplete(@NonNull Task<Void> task) {
+                myRef.child("Contacts").child(firebaseUser.getUid())
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot currentDataSnapshot : dataSnapshot.getChildren()){
+                                    int currentOrder = currentDataSnapshot.child("Order").getValue(int.class);
+                                    myRef.child("Contacts").child(firebaseUser.getUid())
+                                            .child(friendUid).child("Order").setValue(currentOrder+1);
+                                }
+                            }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
-        myRef.child("Contacts").child(firebaseUser.getUid())
-                .child(friendUid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                allMessages = new ArrayList<>();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    Message newMessage = child.getValue(Message.class);
-                    allMessages.add(newMessage);
-                }
-                displayMessages();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                            }
+                        });
             }
         });
+
+        myRef.child("Contacts").child(friendUid).child(firebaseUser.getUid()).child("Order")
+                .setValue(0).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                myRef.child("Contacts").child(friendUid)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot currentDataSnapshot : dataSnapshot.getChildren()){
+                                    int currentOrder = currentDataSnapshot.child("Order").getValue(int.class);
+                                    myRef.child("Contacts").child(friendUid)
+                                            .child(friendUid).child("Order").setValue(currentOrder+1);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+            }
+        });
+    }
+
+    void getMessagesFromDatabase(final String friendUid) {
+        if (!isItFirstTime) {
+            myRef.child("Contacts").child(firebaseUser.getUid())
+                    .child(friendUid).addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    Message newMessage = dataSnapshot.getValue(Message.class);
+                    allMessages.add(newMessage);
+                    displayMessages();
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }else {
+            myRef.child("Contacts").child(firebaseUser.getUid())
+                    .child(friendUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    // This method is called once with the initial value and again
+                    // whenever data at this location is updated.
+                    allMessages.clear();
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        Message newMessage = child.getValue(Message.class);
+                        allMessages.add(newMessage);
+                    }
+                    displayMessages();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+        }
+        isItFirstTime = false;
     }
 
     private void getMessagesFromRequests(final String friendUid) {

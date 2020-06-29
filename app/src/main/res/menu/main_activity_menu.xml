@@ -4,6 +4,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/app_bar_search"
+        android:icon="@drawable/ic_baseline_search"
+        android:title="Search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.widget.SearchView" />
+    <item
         android:id="@+id/Find_Friends"
         android:title="Find Friends" />
     <item

@@ -14,7 +14,7 @@ import com.example.whatsappclone.databases.room.dao.UserDao;
 import com.example.whatsappclone.models.Message;
 import com.example.whatsappclone.models.User;
 
-@Database(entities = {User.class , Message.class}, version = 2) //Here pass the tables like {Note.class , Person.class}
+@Database(entities = {User.class , Message.class}, version = 4) //Here pass the tables like {Note.class , Person.class}
 public abstract class ChatFragmentDatabase extends RoomDatabase {  // it is abstract class because we will use abstract methods
     private static ChatFragmentDatabase instance;
     public abstract UserDao userDao(); // it is abstract because we will not write body for the method

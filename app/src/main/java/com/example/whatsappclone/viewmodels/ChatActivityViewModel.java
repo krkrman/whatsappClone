@@ -24,6 +24,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
     }
 
     public MutableLiveData<List<Message>> getChats(){
+        allMessagesLiveData = repository.getLiveData();
         return allMessagesLiveData;
     }
 

@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
@@ -14,10 +16,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.Toast;
 import com.example.whatsappclone.Settings.ProfileActivity;
 import com.example.whatsappclone.Settings.SettingsActivity;
+import com.example.whatsappclone.fragments.ChatsFragment;
+import com.example.whatsappclone.fragments.ContactsFragment;
+import com.example.whatsappclone.fragments.GroupsFragment;
 import com.example.whatsappclone.fragments.TabAccessorAdapter;
 import com.example.whatsappclone.generalClasses.GeneralPurposes;
 import com.example.whatsappclone.generalClasses.SharedPreference;
@@ -26,7 +33,6 @@ import com.example.whatsappclone.models.GroupModelItem;
 import com.example.whatsappclone.registiration.LoginActivity;
 import com.example.whatsappclone.registiration.RegisterActivity;
 import com.example.whatsappclone.services.MessagesNotificationService;
-import com.example.whatsappclone.viewmodels.ChatsViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
@@ -37,6 +43,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -59,10 +67,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();
         initObjects();
-        generalPurposes.setMeOnline();
         checkUser(firebaseUser);
         createDatabase();
         getData(firebaseUser);
+        generalPurposes.setMeOnline();
     }
 
     @Override
@@ -176,6 +184,38 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.app_bar_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // to call any methods in tabs
+                List<Fragment> fragments = getSupportFragmentManager().getFragments();
+                if (fragments != null) {
+                    for (Fragment fragment : fragments) {
+                        if (fragment instanceof ChatsFragment) {
+                            ((ChatsFragment) fragment).setFilteredList(newText);
+                        }
+                        if (fragment instanceof ContactsFragment) {
+                            ((ContactsFragment) fragment).setFilteredList(newText);
+
+                        }
+                        if (fragment instanceof GroupsFragment) {
+                            ((GroupsFragment) fragment).setFilteredList(newText);
+                            Toast.makeText(MainActivity.this, "happened", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                }
+                return false;
+            }
+        });
         return true;
     }
 

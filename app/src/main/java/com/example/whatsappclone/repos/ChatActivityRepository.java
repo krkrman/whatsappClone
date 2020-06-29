@@ -19,14 +19,13 @@ import java.util.List;
 
 public class ChatActivityRepository {
     private MessageDao messageDao;
-    MutableLiveData<List<Message>> allMessagesMutableLiveData;
-    LiveData<List<Message>> messageRoomData;
+    MutableLiveData<List<Message>> allMessagesMutableLiveData = new MutableLiveData<>();
+
     FirebaseUser firebaseUser;
     DatabaseReference myRef;
     List<Message> allMessages;
 
     public ChatActivityRepository(Application application) {
-        allMessagesMutableLiveData = new MutableLiveData<>();
         allMessages = new ArrayList<>();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         ChatFragmentDatabase database = ChatFragmentDatabase.getInstance(application);

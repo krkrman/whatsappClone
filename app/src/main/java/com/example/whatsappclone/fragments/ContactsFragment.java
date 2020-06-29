@@ -3,6 +3,7 @@ package com.example.whatsappclone.fragments;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,7 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.whatsappclone.R;
 import com.example.whatsappclone.adapters.ContactsAdapter;
@@ -27,6 +27,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -86,7 +87,7 @@ public class ContactsFragment extends Fragment {
     private FirebaseUser firebaseUser;
     private RecyclerView.LayoutManager layoutManager;
     private ContactsAdapter mAdapter;
-    ArrayList<User> contactUsers ;
+    List<User> allUsers;
     DatabaseReference myRef , userRef , contactRef;
     private String friendUid;
 
@@ -97,7 +98,22 @@ public class ContactsFragment extends Fragment {
         contactFragmentView = inflater.inflate(R.layout.fragment_contacts, container, false);
         initObjects();
         initRecyclerView();
-        final Query applesQuery = myRef.child("Contacts").child(firebaseUser.getUid()).orderByChild("messageContent");
+        myRef.child("Users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                    if (dataSnapshot1.getKey() != firebaseUser.getUid())
+                        allUsers.add(dataSnapshot1.getValue(User.class));
+                }
+                mAdapter.setList(allUsers);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        /*final Query applesQuery = myRef.child("Contacts").child(firebaseUser.getUid()).orderByChild("messageContent");
         applesQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -109,8 +125,7 @@ public class ContactsFragment extends Fragment {
                             // This method is called once with the initial value and again
                             // whenever data at this location is updated.
                             User contactUser = dataSnapshot.getValue(User.class);
-                            Toast.makeText(getContext(), contactUser.getUsername(), Toast.LENGTH_SHORT).show();
-                            contactUsers.add(contactUser);
+                            allUsers.add(contactUser);
                         }
 
                         @Override
@@ -119,7 +134,7 @@ public class ContactsFragment extends Fragment {
                         }
                     });
                 }
-                mAdapter.setList(contactUsers);
+                mAdapter.setList(allUsers);
                 mAdapter.notifyDataSetChanged();
             }
 
@@ -127,7 +142,7 @@ public class ContactsFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
                 Log.e("Database delete", "onCancelled", databaseError.toException());
             }
-        });
+        });*/
         return contactFragmentView;
     }
 
@@ -143,7 +158,7 @@ public class ContactsFragment extends Fragment {
 
         // specify an adapter (see also next example)
         // put you list on the constructor
-        mAdapter = new ContactsAdapter(contactUsers , getContext());
+        mAdapter = new ContactsAdapter(getContext());
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -153,7 +168,7 @@ public class ContactsFragment extends Fragment {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         contactRef = FirebaseDatabase.getInstance().getReference().child("Contacts").child(firebaseUser.getUid());
-        contactUsers = new ArrayList<>();
+        allUsers = new ArrayList<>();
         myRef = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -173,5 +188,9 @@ public class ContactsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void setFilteredList(String searchedItems){
+        mAdapter.getFilter().filter(searchedItems);
     }
 }

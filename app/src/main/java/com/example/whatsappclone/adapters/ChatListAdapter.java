@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,8 +20,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.chatViewHolder> {
+public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.chatViewHolder> implements Filterable {
     List<User> chatsList;
+    List<User> chatsListFull;
     Context context;
 
     public ChatListAdapter(Context context) {
@@ -42,7 +45,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.chatVi
         holder.friendName.setText(chatsList.get(position).getUsername());
         holder.lastMessage.setText(chatsList.get(position).getAbout());
         if (!chatsList.get(position).getImageUrl().equals(""))
-            Picasso.get().load(chatsList.get(position).getImageUrl()).placeholder(R.drawable.default_profile_image).into(holder.friendImage);
+            Picasso.get().load(chatsList.get(position).getImageUrl())
+                    .placeholder(R.drawable.default_profile_image).into(holder.friendImage);
         holder.friendImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,8 +75,42 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.chatVi
 
     public void setList(List<User> chatsList) {
         this.chatsList = chatsList;
+        this.chatsListFull = new ArrayList<>(chatsList); // we do that to take a copy from data if i assign it , it will change with it
         notifyDataSetChanged();
     }
+
+    @Override
+    public Filter getFilter() {
+        return chatsFilter;
+    }
+
+    private Filter  chatsFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<User> filteredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filteredList = chatsListFull;
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (User item : chatsListFull) {
+                    if (item.getUsername().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            chatsList.clear();
+            chatsList.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
+
     public static class chatViewHolder extends RecyclerView.ViewHolder {
 
         //initialize the view of the item as shown below
@@ -89,6 +127,5 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.chatVi
             linearLayout = itemView.findViewById(R.id.group_item_linear_layout);// this is the whole item which we will click on
         }
     }
-
 }
 

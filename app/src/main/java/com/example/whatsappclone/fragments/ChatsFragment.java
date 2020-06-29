@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.whatsappclone.MainActivity;
@@ -22,7 +24,13 @@ import com.example.whatsappclone.R;
 import com.example.whatsappclone.adapters.ChatListAdapter;
 import com.example.whatsappclone.generalClasses.SharedPreference;
 import com.example.whatsappclone.models.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,25 +42,33 @@ public class ChatsFragment extends Fragment {
 
     public ChatsFragment() {
     }
+    public interface ChatsFragmentListener {
+        void onInputASent(CharSequence input);
+    }
 
     SharedPreference sharedPreference;
     // TODO: Rename and change types of parameters
     private RequestsFragment.OnFragmentInteractionListener mListener;
     private DatabaseReference userRef;
     View chatFragmentView;
-
+    ChatsViewModel chatsViewModel;
     private RecyclerView recyclerView;
-    private ChatListAdapter mAdapter;
+    public ChatListAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
-
+    DatabaseReference myRef;
+    FirebaseUser firebaseUser;
+    List<User> allChatsUsers;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         chatFragmentView = inflater.inflate(R.layout.fragment_chats, container, false);
         initRecyclerView();
         sharedPreference = new SharedPreference(getContext());
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        myRef = FirebaseDatabase.getInstance().getReference();
+        allChatsUsers = new ArrayList<>();
 
-        final ChatsViewModel chatsViewModel = new ViewModelProvider(this,
+        chatsViewModel = new ViewModelProvider(this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
                 .get(ChatsViewModel.class); // this is the instance of AndroidViewModel
 
@@ -63,7 +79,37 @@ public class ChatsFragment extends Fragment {
             }
         });
 
+        getAllUsersFromFirebase();
+
         return chatFragmentView;
+    }
+    public void getAllUsersFromFirebase() {
+        myRef.child("Contacts").child(firebaseUser.getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        allChatsUsers.clear();
+                        chatsViewModel.deleteAllChats();
+                        for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
+                            myRef.child("Users").child(chatSnapshot.getKey()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    allChatsUsers.add(dataSnapshot.getValue(User.class));
+                                     mAdapter.setList(allChatsUsers);
+                                     chatsViewModel.insert(dataSnapshot.getValue(User.class));
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
     }
 
     void initRecyclerView(){
@@ -86,6 +132,11 @@ public class ChatsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         //initFirebaseAdapter();
+    }
+
+
+    public void setFilteredList(String searchedItems){
+        mAdapter.getFilter().filter(searchedItems);
     }
 
     /*public static class FindFriendViewHolder extends RecyclerView.ViewHolder {

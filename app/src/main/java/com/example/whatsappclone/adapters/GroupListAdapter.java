@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,12 +18,14 @@ import com.example.whatsappclone.R;
 import com.example.whatsappclone.models.GroupModelItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.GroupViewHolder> {
-    ArrayList<GroupModelItem> groupList;
+public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.GroupViewHolder> implements Filterable {
+    List<GroupModelItem> groupList;
+    List<GroupModelItem> groupListFull;
     Context context;
 
-    public GroupListAdapter(ArrayList<GroupModelItem> groupModelItemArrayList , Context context) {
+    public GroupListAdapter(List<GroupModelItem> groupModelItemArrayList , Context context) {
         this.groupList = groupModelItemArrayList;
         // we get the context to apply some functions which we need an activity to be done like startActivity
         this.context = context;
@@ -58,10 +62,42 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
         return groupList.size();
     }
 
-    public void setList(ArrayList<GroupModelItem> grouplist){
+    public void setList(List<GroupModelItem> grouplist){
         this.groupList = grouplist;
+        this.groupListFull = new ArrayList<>(grouplist); // we do that to take a copy from data if i assign it , it will change with it
         notifyDataSetChanged();
     }
+    @Override
+    public Filter getFilter() {
+        return groupsFilter;
+    }
+
+    private Filter groupsFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<GroupModelItem> filteredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filteredList = groupListFull;
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (GroupModelItem item : groupListFull) {
+                    if (item.getGroupName().toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            groupList.clear();
+            groupList.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     public static class GroupViewHolder extends RecyclerView.ViewHolder {
 
@@ -78,5 +114,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.Grou
             linearLayout = itemView.findViewById(R.id.group_item_linear_layout);// this is the whole item which we will click on
         }
     }
+
+
 
 }

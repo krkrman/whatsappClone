@@ -39,33 +39,6 @@ public class ChatFragmentRepository {
         allChatsMutableLiveData.setValue(userDao.getAllUsers());
     }
 
-    public void getAllUsersFromFirebase() {
-        myRef.child("Contacts").child(firebaseUser.getUid())
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
-                            myRef.child("Users").child(chatSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    allChatsUsers.clear();
-                                    allChatsUsers.add(dataSnapshot.getValue(User.class));
-                                    allChatsMutableLiveData.setValue(allChatsUsers);
-                                    insertAllChats(allChatsUsers);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
-    }
 
     public void insert(User user) {
         new InsertUserAsyncTask(userDao).execute(user);

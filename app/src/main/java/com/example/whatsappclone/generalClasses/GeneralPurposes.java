@@ -39,13 +39,15 @@ public class GeneralPurposes {
     public void setMeOnline(){
         user.setOnline(true);
         sharedPreference.saveData(user);
-        myRef.child("Users").child(firebaseUser.getUid()).child("online")
-                .setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Log.d(TAG, "completedSuccessfully ");
-            }
-        });
+        if (firebaseUser != null) {
+            myRef.child("Users").child(firebaseUser.getUid()).child("online")
+                    .setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Log.d(TAG, "completedSuccessfully ");
+                }
+            });
+        }
     }
 
     public void setMeOffline(){
